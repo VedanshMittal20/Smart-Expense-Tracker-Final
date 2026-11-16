@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { expenseService } from './services/expenseService';
-import ExpenseSummary from './components/ExpenseSummary';
-import CategoryChart from './components/CategoryChart';
-import ExpenseForm from './components/ExpenseForm';
-import ExpenseList from './components/ExpenseList';
+import DashboardView from './views/DashboardView';
+import TransactionsView from './views/TransactionsView';
+import AnalyticsView from './views/AnalyticsView';
+import BudgetGoalsView from './views/BudgetGoalsView';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [expenses, setExpenses] = useState([]);
   const [summary, setSummary] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [editingExpense, setEditingExpense] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
 
@@ -26,7 +26,7 @@ export default function App() {
       setSummary(summaryData);
     } catch (err) {
       console.error(err);
-      setApiError('Unable to connect to Spring Boot backend (http://localhost:8080). Make sure backend is running.');
+      setApiError('Unable to connect to Spring Boot backend (http://localhost:8081). Make sure backend is running.');
     } finally {
       setLoading(false);
     }
@@ -36,12 +36,11 @@ export default function App() {
     loadData(selectedCategory);
   }, [selectedCategory]);
 
-  // Handle Create or Update
-  const handleSaveExpense = async (formData) => {
+  // Handle Save (Create or Update)
+  const handleSaveExpense = async (formData, existingId = null) => {
     try {
-      if (editingExpense) {
-        await expenseService.update(editingExpense.id, formData);
-        setEditingExpense(null);
+      if (existingId) {
+        await expenseService.update(existingId, formData);
       } else {
         await expenseService.create(formData);
       }
@@ -63,7 +62,7 @@ export default function App() {
     }
   };
 
-  // Handle Seed Demo Data
+  // Handle Seed
   const handleSeed = async () => {
     try {
       await expenseService.seed();
@@ -74,69 +73,116 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      {/* Top Navigation Bar */}
-      <header className="navbar">
-        <div className="navbar-brand">
+    <div className="layout-root">
+      {/* Sidebar Navigation */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
           <div className="brand-logo">₹</div>
           <div>
-            <h1 className="brand-title">SmartSpend</h1>
-            <p className="brand-subtitle">Personal Expense Tracker & Analytics Platform</p>
+            <h2 className="brand-title">SmartSpend</h2>
+            <p className="brand-badge">Full Stack Portal</p>
           </div>
         </div>
 
-        <div className="navbar-status">
-          {apiError ? (
-            <span className="status-pill status-offline">● Backend Offline</span>
-          ) : (
-            <span className="status-pill status-online">● Spring Boot Connected</span>
-          )}
-          <button className="btn-secondary btn-sm" onClick={() => loadData(selectedCategory)}>
-            ↻ Refresh
+        <nav className="sidebar-nav">
+          <button
+            className={`nav-item ${activeTab === 'dashboard' ? 'nav-active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <span className="nav-icon">📊</span>
+            <span>Dashboard</span>
           </button>
-        </div>
-      </header>
 
-      {/* Backend Disconnected Warning */}
-      {apiError && (
-        <div className="alert-banner">
-          <strong>⚠️ Connection Notice:</strong> {apiError}
-          <div className="alert-hint">
-            To start backend, open a terminal in <code>backend/</code> and run <code>mvn spring-boot:run</code>.
+          <button
+            className={`nav-item ${activeTab === 'transactions' ? 'nav-active' : ''}`}
+            onClick={() => setActiveTab('transactions')}
+          >
+            <span className="nav-icon">💳</span>
+            <span>Transactions</span>
+            <span className="nav-count">{expenses.length}</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'analytics' ? 'nav-active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+          >
+            <span className="nav-icon">📈</span>
+            <span>Analytics & Reports</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'budgets' ? 'nav-active' : ''}`}
+            onClick={() => setActiveTab('budgets')}
+          >
+            <span className="nav-icon">🎯</span>
+            <span>Budget Goals</span>
+          </button>
+        </nav>
+
+        {/* Sidebar Footer with Live Connection Status */}
+        <div className="sidebar-footer">
+          <div className="status-box">
+            {apiError ? (
+              <span className="status-pill status-offline">● Backend Offline</span>
+            ) : (
+              <span className="status-pill status-online">● Spring Boot Live</span>
+            )}
+            <button className="btn-icon btn-refresh" title="Reload Data" onClick={() => loadData(selectedCategory)}>
+              ↻
+            </button>
+          </div>
+
+          <div className="user-profile">
+            <div className="user-avatar">👨‍💻</div>
+            <div className="user-info">
+              <strong>Capstone Candidate</strong>
+              <small className="text-muted">Spring Boot & React</small>
+            </div>
           </div>
         </div>
-      )}
+      </aside>
 
-      {/* KPI Stat Cards */}
-      <ExpenseSummary summary={summary} />
+      {/* Main Content View */}
+      <main className="content-area">
+        {apiError && (
+          <div className="alert-banner">
+            <strong>⚠️ Connection Notice:</strong> {apiError}
+          </div>
+        )}
 
-      {/* Main Grid: Form & Visual Analytics */}
-      <div className="grid-main">
-        <ExpenseForm
-          onSave={handleSaveExpense}
-          editData={editingExpense}
-          onCancel={() => setEditingExpense(null)}
-        />
-        <CategoryChart
-          breakdown={summary?.categoryBreakdown || {}}
-          total={summary?.totalExpenses || 0}
-        />
-      </div>
+        {activeTab === 'dashboard' && (
+          <DashboardView
+            summary={summary}
+            expenses={expenses}
+            onSaveExpense={(d) => handleSaveExpense(d)}
+            onViewAllTransactions={() => setActiveTab('transactions')}
+          />
+        )}
 
-      {/* Expense Data Table */}
-      <ExpenseList
-        expenses={expenses}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        onEdit={setEditingExpense}
-        onDelete={handleDeleteExpense}
-        onSeed={handleSeed}
-      />
+        {activeTab === 'transactions' && (
+          <TransactionsView
+            expenses={expenses}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+            onSaveExpense={handleSaveExpense}
+            onDeleteExpense={handleDeleteExpense}
+            onSeed={handleSeed}
+          />
+        )}
 
-      {/* Footer */}
-      <footer className="footer">
-        <p>Full Stack Capstone Project | Built with <strong>React.js</strong>, <strong>Spring Boot 3</strong>, and <strong>REST APIs</strong></p>
-      </footer>
+        {activeTab === 'analytics' && (
+          <AnalyticsView
+            summary={summary}
+            expenses={expenses}
+          />
+        )}
+
+        {activeTab === 'budgets' && (
+          <BudgetGoalsView
+            summary={summary}
+          />
+        )}
+      </main>
     </div>
   );
 }

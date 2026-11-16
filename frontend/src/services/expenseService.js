@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api/expenses';
+const API_BASE_URL = 'http://localhost:8081/api/expenses';
 
 export const expenseService = {
   // Fetch all expenses (with optional category filter)

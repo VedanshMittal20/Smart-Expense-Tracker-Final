@@ -20,7 +20,7 @@
        │
        │ HTTP / JSON (via REST APIs)
        ▼
-[ Spring Boot Controller: ExpenseController ] (Port 8080)
+[ Spring Boot Controller: ExpenseController ] (Port 8081)
        │
        │ Dependency Injection (@Autowired)
        ▼
@@ -79,4 +79,4 @@
 2. **Demonstrate Create:** Add an expense (e.g., Title: *"Exam Stationary"*, Amount: `150`, Category: *"Utilities"*). Click Add. Point out how the list updates instantly and the progress bar adjusts.
 3. **Demonstrate Filter:** Select *"Food"* from the filter dropdown to show filtered queries.
 4. **Demonstrate Delete:** Click the `✕` button on an entry to show real-time deletion and total recalculation.
-5. **Show Database / H2 Console:** Open `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:expensedb`), click Connect, run `SELECT * FROM EXPENSES;` to prove data persistence.
+5. **Show Database / H2 Console:** Open `http://localhost:8081/h2-console` (JDBC URL: `jdbc:h2:mem:expensedb`), click Connect, run `SELECT * FROM EXPENSES;` to prove data persistence.

@@ -7,7 +7,7 @@ A Full-Stack Capstone web application developed with **React.js** and **Spring B
 ## 🚀 How to Run the Project (Quick Start)
 
 ### Option 1: Double-Click Batch Files (Easiest)
-1. Double-click `run-backend.bat` (Starts Spring Boot at `http://localhost:8080`).
+1. Double-click `run-backend.bat` (Starts Spring Boot at `http://localhost:8081`).
 2. Double-click `run-frontend.bat` (Starts React UI at `http://localhost:3000`).
 3. Open your browser to `http://localhost:3000`.
 
@@ -20,8 +20,8 @@ A Full-Stack Capstone web application developed with **React.js** and **Spring B
 cd backend
 mvn spring-boot:run
 ```
-- Server starts on: `http://localhost:8080`
-- Database console (H2): `http://localhost:8080/h2-console`
+- Server starts on: `http://localhost:8081`
+- Database console (H2): `http://localhost:8081/h2-console`
   - JDBC URL: `jdbc:h2:mem:expensedb`
   - Username: `sa`
   - Password: *(leave blank)*
